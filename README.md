@@ -1,6 +1,6 @@
-# Tensor MPPCA
+# (Tensor) MP-PCA
 
-Tensor MP-PCA denoiser for MRI data — Python package with a fast C++/Eigen backend.
+MP-PCA denoiser for MRI data compatible with the tensor method [2] — Python package with a fast C++/Eigen backend.
 
 **References:** 
 1. Veraart J, Novikov D, Christiaens D, Ades-aron B, Sijbers J, Fieremans E, *Denoising of diffusion MRI using random matrix theory*, NeuroImage 2016; 394-406. [doi:10.1016/j.neuroimage.2016.08.016](https://doi.org/10.1016/j.neuroimage.2016.08.016)
@@ -39,12 +39,12 @@ denoised, sigma2, P, snr_gain = denoise_tmppca( data,
 nibabel.save(nibabel.Nifti1Image(denoised, img.affine), 'data_denoised.nii.gz')
 ```
 
-### Standard data (regular MP-PCA with Olesen et al. noise estimation)
+### Standard data (regular MP-PCA with Olesen et al. noise estimation [2])
 
 Concatenate all contrasts along the last axis, then pass them together:
 
 ```python
-# data shape: (Nx, Ny, Nz, Nr) --- 4D -> 3D+Constrasts
+# data shape 4D -> 3D+Constrasts (Nx, Ny, Nz, N-contrast)
 denoised, *_ = denoise_tmppca(data, window=[5, 5, 5])
 ```
 
@@ -54,7 +54,7 @@ For genuinely multi-dimensional measurement structures (e.g., window-voxels × T
 Example:
 
 ```python
-# data shape 5D -> 3D+Mode-contrast+Mode-TE: (Nx, Ny, Nz, N-contrast, N-TE)
+# data shape at least 5D -> 3D+Mode-contrast+Mode-TE (Nx, Ny, Nz, N-contrast, N-TE)
 Nx, Ny, Nz  = data.shape[:3]
 n_contrasts = 3
 n_TE        = 6
@@ -74,7 +74,7 @@ denoised, *_ = denoise_tmppca(data, window=[5, 5, 5])
 | `stride` | `[1,1,1]` | Step size per spatial dimension (1 = full overlap of patches; higher is faster but coarsest) |
 | `optim_shrinkage` | `True` | Gavish-Donoho optimal singular-value shrinkage |
 | `joint_noise_est` | `True` | Pool noise estimates across all tensor modes |
-| `num_threads` | `0` | OpenMP thread count (0 = all cores; C++ only) |
+| `num_threads` | `0` | OpenMP thread count (0 = all cores) |
 | `center_only` | `False` | `True`: only restore the central voxel upon each patch denoising; `False`: each voxel is denoised N=Nx×Ny×Nz (window size) times & averaged |
 | `mode_grouping` | auto | Controls how patch dimensions are grouped into tensor modes for the multi-level SVD. By default all spatial dims form one group and each measurement dim gets its own group (e.g. a 5D array with `window=[5,5,5]` gives `[[0,1,2],[3],[4]]`). Only set this explicitly for non-standard groupings such as fusing a spatial dimension with a measurement dimension. |
 
