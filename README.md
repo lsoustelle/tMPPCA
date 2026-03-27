@@ -50,7 +50,7 @@ denoised, *_ = denoise_tmppca(data, window=[5, 5, 5])
 
 ### Multi-modal data (tensor MP-PCA)
 
-For genuinely multi-dimensional measurement structures (e.g., window-voxels × TE × contrast; 3 "modes"), reshape your data accordingly (array shapes 3D+Contrast-1+Constrast-2).
+For genuinely multi-dimensional measurement structures (e.g., window-voxels × TE × contrast; a.k.a., 3 "modes"), reshape your data accordingly (array shapes 3D+Contrast-1+Constrast-2).
 Example:
 
 ```python
