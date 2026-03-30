@@ -2,6 +2,9 @@
 requires      = ["scikit-build-core>=0.9"]
 build-backend = "scikit_build_core.build"
 
+[project.scripts]
+denoise-tmppca = "tmppca.denoise_tmppca_cli:main"
+
 [project]
 name            = "tmppca"
 version         = "0.1"

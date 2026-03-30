@@ -22,6 +22,7 @@ pip install .
 ---
 
 ## Usage
+A wrapper is made available, see ``denoise-tmppca --help``.
 
 ```python
 import nibabel
