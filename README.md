@@ -25,18 +25,18 @@ pip install .
 
 ```python
 import nibabel
-from tmppca import denoise_tmppca
+from tmppca import tmppca_cpp
 
-data = nibabel.load('data.nii.gz').get_fdata() # float64
+data = nibabel.load('data.nii.gz')
 mask = nibabel.load('mask.nii.gz').get_fdata().astype(bool)
 
-denoised, sigma2, P, snr_gain = denoise_tmppca( data,
-                                                window          = [5, 5, 5],
-                                                mask            = mask,
-                                                num_threads     = 8
-                                              )
+denoised, sigma2, _, _ = tmppca_cpp.denoise_tmppca( data.get_fdata(),
+                                                    window          = [5, 5, 5],
+                                                    mask            = mask,
+                                                    num_threads     = 8
+                                                  )
 
-nibabel.save(nibabel.Nifti1Image(denoised, img.affine), 'data_denoised.nii.gz')
+nibabel.save(nibabel.Nifti1Image(denoised, data.affine, data.header), 'data_denoised.nii')
 ```
 
 ### Standard data (regular MP-PCA with Olesen et al. noise estimation [2])
