@@ -30,13 +30,14 @@ from tmppca import tmppca_cpp
 data = nibabel.load('data.nii.gz')
 mask = nibabel.load('mask.nii.gz').get_fdata().astype(bool)
 
-denoised, sigma2, _, _ = tmppca_cpp.denoise_tmppca( data.get_fdata(),
+denoised, sigma2, *_ = tmppca_cpp.denoise_tmppca( data.get_fdata(),
                                                     window          = [5, 5, 5],
                                                     mask            = mask,
                                                     num_threads     = 8
                                                   )
 
 nibabel.save(nibabel.Nifti1Image(denoised, data.affine, data.header), 'data_denoised.nii')
+nibabel.save(nibabel.Nifti1Image(sigma2, data.affine, data.header), 'data_sigma2.nii')
 ```
 
 ### Standard data (regular MP-PCA with Olesen et al. noise estimation [2])
