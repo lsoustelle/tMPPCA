@@ -30,11 +30,11 @@ from tmppca import tmppca_cpp
 data = nibabel.load('data.nii.gz')
 mask = nibabel.load('mask.nii.gz').get_fdata().astype(bool)
 
-denoised, sigma2, *_ = tmppca_cpp.denoise_tmppca( data.get_fdata(),
-                                                    window          = [5, 5, 5],
-                                                    mask            = mask,
-                                                    num_threads     = 8
-                                                  )
+denoised, sigma2, P, snr_gain = tmppca_cpp.denoise_tmppca(  data.get_fdata(),
+                                                            window          = [5, 5, 5],
+                                                            mask            = mask,
+                                                            num_threads     = 8
+                                                          )
 
 nibabel.save(nibabel.Nifti1Image(denoised, data.affine, data.header), 'data_denoised.nii')
 nibabel.save(nibabel.Nifti1Image(sigma2, data.affine, data.header), 'data_sigma2.nii')
@@ -66,7 +66,7 @@ denoised, *_ = denoise_tmppca(data, window=[5, 5, 5])
 
 ---
 
-## Key parameters
+## Input parameters
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
@@ -79,4 +79,12 @@ denoised, *_ = denoise_tmppca(data, window=[5, 5, 5])
 | `center_only` | `False` | `True`: only restore the central voxel upon each patch denoising; `False`: each voxel is denoised N=Nx×Ny×Nz (window size) times & averaged |
 | `mode_grouping` | auto | Controls how patch dimensions are grouped into tensor modes for the multi-level SVD. By default all spatial dims form one group and each measurement dim gets its own group (e.g. a 5D array with `window=[5,5,5]` gives `[[0,1,2],[3],[4]]`). Only set this explicitly for non-standard groupings such as fusing a spatial dimension with a measurement dimension. |
 
+## Outputs
+
+| Output |  Description |
+|-----------|---------|
+| `denoised` | Denoised image matrix |
+| `sigma2`  | Noise variance map |
+| `P` | Number of signal components (rank) retained after thresholding, per voxel |
+| `snr_gain` | Theoretical factor by which the voxel-wise SNR improves after denoising |
 
