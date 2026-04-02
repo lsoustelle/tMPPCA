@@ -43,7 +43,7 @@ inline NoiseEstimate estimate_noise(const Vector& s, int M, int N)
     const int Mp = r;
     const int Np = (M > N) ? M : N;    // max(M, N)
 
-    // ── Energy estimator (sigmasq_1) 
+    // ── Energy estimator (sigmasq_1)
     // sigmasq_1[p] = sum(s²[p:]) / ((Mp-p) * (Np-p))
     // Iterate from the tail, accumulating the suffix sum.
     std::vector<double> sigmasq_1(Mp);
@@ -57,14 +57,14 @@ inline NoiseEstimate estimate_noise(const Vector& s, int M, int N)
         }
     }
 
-    // ── Width estimator (sigmasq_2) 
+    // ── Width estimator (sigmasq_2)
     // sigmasq_2[p] = (s²[p] - s²[Mp-1]) / (4 * sqrt(Np * Mp))
     // Theoretical MP bulk width = 4 * sigma² * sqrt(Np * Mp).
     // Defined for p in [0, Mp-2] only (need at least one bulk eigenvalue).
     const double range_mp  = 4.0 * std::sqrt((double)Np * (double)Mp);
     const double last_val2 = s(Mp - 1) * s(Mp - 1);
 
-    // ── Find crossover 
+    // ── Find crossover
     // t = first p in [0, Mp-2] where sigmasq_2[p] < sigmasq_1[p].
     int t = Mp - 2;  // fallback: use near-last component
     for (int p = 0; p < Mp - 1; ++p)
@@ -105,6 +105,8 @@ inline DiscardResult discard_noise(
 
 // ============================================================
 //  apply_optimal_shrinkage
+//  Gavish-Donoho optimal shrinkage (Frobenius loss).
+//  M and N are the RESIDUAL noise-subspace dimensions (full_M - P, full_N - P).
 //  Only called when P > 0 (caller's responsibility).
 // ============================================================
 inline Vector apply_optimal_shrinkage(const Vector& s, int M, int N, double sigma2)
@@ -236,7 +238,12 @@ inline DenoiseResult denoise_array_tmppca(
         }
 
         if (optim_shrinkage && n == nd_rec - 1 && dr.P > 0)
-            dr.s = apply_optimal_shrinkage(dr.s, (int)dr.U.rows(), (int)dr.V.rows(), sigma2);
+        {
+            // Pass residual noise-subspace dims (M-P, N-P) per Gavish-Donoho
+            const int Mr = std::max((int)dr.U.rows() - dr.P, 1);
+            const int Nr = std::max((int)dr.V.rows() - dr.P, 1);
+            dr.s = apply_optimal_shrinkage(dr.s, Mr, Nr, sigma2);
+        }
 
         Matrix V_keep = dr.V;
         Vector s_keep = dr.s;
